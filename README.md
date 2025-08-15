@@ -33,6 +33,9 @@ This project demonstrates how to build a **serverless, scalable, and low-latency
 - React (Frontend UI)
 - Terraform (Infrastructure as Code)
 - Draw.io (Architecture Diagrams)
+- ## 📊 Architecture Diagram
+![Architecture Diagram](architecture.png)
+
 
 ---
 
