@@ -66,8 +66,6 @@ This project demonstrates how to build a **serverless, scalable, and low-latency
 ---
 
 ## 📂 Project Structure
-## 📂 Project Structure
-.
 ├── README.md                # Documentation
 ├── architecture.png         # Architecture diagram
 ├── Welcome file.md          # Detailed project intro
