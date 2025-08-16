@@ -92,7 +92,7 @@ python -m pytest -q
 
 ## 🚢 Manual deploy (quick path)
 
-1) Zip the Lambda code (run from `services/api/lambda_fn` on Windows PowerShell):
+Zip the Lambda code (run from `services/api/lambda_fn` on Windows PowerShell):
 ```powershell
 Compress-Archive -Path * -DestinationPath ../lambda.zip -Force
 Upload to AWS Lambda (Console):
@@ -113,6 +113,24 @@ POST /events
 
 Create stage prod with Auto-deploy ON and use the Invoke URL shown on the stage page.
 
+## 🧱 Architecture
+
+```mermaid
+flowchart LR
+  A[Web/App Events] -->|Kinesis| B[Firehose]
+  B --> C[S3 Data Lake]
+  D[Catalog Dump] --> C
+  C --> E[Glue ETL/Curated]
+  E --> F[(Amazon Personalize)]
+  F --> G{Serving}
+  G -->|Real-time| H[API Gateway → Lambda → Campaign/Endpoint]
+  G -->|Batch| I[Batch Recommendations in S3]
+  H --> J[Frontend (S3 + CloudFront)]
+
+  subgraph Ops
+  K[Step Functions: nightly import/retrain/deploy]
+  L[CloudWatch + Model Monitor + QuickSight]
+  end
 
 
 
