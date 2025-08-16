@@ -24,7 +24,7 @@ curl "$BASE/recommendations/personalized?userId=U1&k=3"
 curl "$BASE/recommendations/related?itemId=I100&k=3"
 curl -X POST "$BASE/events" -H "content-type: application/json" -d '{"userId":"U1","itemId":"I100","event_type":"view"}'
 
-What’s implemented now
+## implemented
 
 Serverless API: API Gateway (HTTP API) → Lambda (Python 3.11)
 
@@ -39,7 +39,8 @@ events (accepts JSON event payload)
 Unit tests: pytest (all tests passing)
 
 Repo layout: ready for CI/CD, infra, and data utilities
-🧭 Roadmap (next)
+
+🧭 Roadmap 
 
 Amazon Personalize integration (real recs)
 
@@ -52,6 +53,9 @@ React frontend on S3 + CloudFront
 Observability (CloudWatch dashboards, alarms)
 
 IaC expansion (Terraform for API/Lambda/roles)
+
+
+🗂 Project structure
 
 services/
   api/
@@ -72,24 +76,42 @@ infra/
     cicd.yml
 README.md
 
-# create venv
-python -m venv .venv             # if 'python' not found, use: py -3 -m venv .venv
-source .venv/Scripts/activate    # Windows Git Bash
+## 🛠 Run locally
 
-# install & test
+**Requirements:** Python 3.11+, pip
+
+```bash
+# create & activate venv (Windows Git Bash)
+python -m venv .venv             
+source .venv/Scripts/activate
+
+# install deps & run tests
 python -m pip install --upgrade pip
 python -m pip install -r services/api/requirements.txt
 python -m pytest -q
 
-# optional sample data
-python data/generators/generate_synthetic.py
+## 🚢 Manual deploy (quick path)
 
-flowchart LR
-  A[Client / curl] --> B[API Gateway (HTTP API)]
-  B --> C[Lambda (Python)]
-  C -->|mock today| D[(Mock data)]
-  C -.future .-> E[(Amazon Personalize)]
-  C -.future .-> F[(DynamoDB)]
+1) Zip the Lambda code (run from `services/api/lambda_fn` on Windows PowerShell):
+```powershell
+Compress-Archive -Path * -DestinationPath ../lambda.zip -Force
+Upload to AWS Lambda (Console):
+
+Runtime: Python 3.11
+
+Handler: app.handler
+
+Code: upload services/api/lambda.zip
+
+Create an HTTP API (API Gateway) and attach the Lambda to these routes:
+
+GET /recommendations/personalized
+
+GET /recommendations/related
+
+POST /events
+
+Create stage prod with Auto-deploy ON and use the Invoke URL shown on the stage page.
 
 
 
