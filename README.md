@@ -122,6 +122,8 @@ curl -X POST "$BASE/events" \
 ---
 
 ## 🧱 Architecture
+![Architecture](Architecture.png)
+
 
 
 
