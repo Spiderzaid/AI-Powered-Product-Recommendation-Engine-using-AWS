@@ -21,7 +21,6 @@ A serverless recommendation API running on **AWS Lambda + API Gateway (HTTP API)
 * Personalized: [https://hcqne2tob5.execute-api.us-east-2.amazonaws.com/prod/recommendations/personalized?userId=U1\&k=3](https://hcqne2tob5.execute-api.us-east-2.amazonaws.com/prod/recommendations/personalized?userId=U1&k=3)
 * Related: [https://hcqne2tob5.execute-api.us-east-2.amazonaws.com/prod/recommendations/related?itemId=I100\&k=3](https://hcqne2tob5.execute-api.us-east-2.amazonaws.com/prod/recommendations/related?itemId=I100&k=3)
 
-> Tip: API versioning (`/v1/...`) and a `GET /health` endpoint are recommended below. The live demo currently uses unversioned paths under `/prod`.
 
 ---
 
@@ -151,7 +150,7 @@ Query params: `userId` (string, required), `k` (int, 1-100, default 5)
 
 Query params: `itemId` (string, required), `k` (int, 1-100, default 5)
 
-**200 OK**
+
 
 ```json
 { "itemId": "I100", "related": [{"id": "I7", "score": 0.67}] }
@@ -170,13 +169,13 @@ Optional: `Idempotency-Key` (string) for safe retries
 
 `event_type` must be one of `view`, `add_to_cart`, `purchase`.
 
-**202 Accepted**
+
 
 ```json
 { "ok": true }
 ```
 
-**400 Bad Request**
+
 
 ```json
 { "error": "Missing userId" }
@@ -184,7 +183,7 @@ Optional: `Idempotency-Key` (string) for safe retries
 
 ### GET /v1/health
 
-**200 OK**
+
 
 ```json
 { "ok": true, "version": "1.0.0" }
