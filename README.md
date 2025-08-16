@@ -159,20 +159,21 @@ curl -X POST "$BASE/events" \
 
 ```mermaid
 flowchart LR
-  A[Web/App Events] -->|Kinesis| B[Firehose]
+  A[Web or App Events] -->|Kinesis| B[Firehose]
   B --> C[S3 Data Lake]
   D[Catalog Dump] --> C
-  C --> E[Glue ETL/Curated]
-  E --> F[(Amazon Personalize)]
+  C --> E[Glue ETL Curated]
+  E --> F[Amazon Personalize]
   F --> G{Serving}
-  G -->|Real-time| H[API Gateway → Lambda → Campaign/Endpoint]
+  G -->|Realtime| H[API Gateway and Lambda and Campaign]
   G -->|Batch| I[Batch Recommendations in S3]
-  H --> J[Frontend (S3 + CloudFront)]
+  H --> J[Frontend S3 and CloudFront]
 
   subgraph Ops
-  K[Step Functions: nightly import/retrain/deploy]
-  L[CloudWatch + Model Monitor + QuickSight]
+    K[Step Functions nightly import retrain deploy]
+    L[CloudWatch Metrics and Model Monitor and QuickSight]
   end
+
 ```
 
 ---
