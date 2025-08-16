@@ -6,7 +6,7 @@ from util import ok, bad_request
 # In a real deployment, these would call Amazon Personalize or a SageMaker endpoint.
 # Here we mock with simple logic for a portfolio starter.
 
-def handler(event, context):
+def handler(event, context=None):
     route_key = event.get('requestContext', {}).get('http', {}).get('path', '')
     query = event.get('queryStringParameters') or {}
     method = event.get('requestContext', {}).get('http', {}).get('method', 'GET')

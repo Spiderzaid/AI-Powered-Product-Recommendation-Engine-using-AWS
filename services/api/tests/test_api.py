@@ -1,5 +1,7 @@
-
-from lambda.app import handler
+import os, sys
+# Make the Lambda code folder importable
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'lambda_fn'))
+from app import handler
 
 def make_event(path, method="GET", qs=None, body=None):
     return {
