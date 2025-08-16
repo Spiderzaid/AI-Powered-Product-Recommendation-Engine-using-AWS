@@ -1,78 +1,146 @@
-﻿# AI-Powered Product Recommendation Engine (AWS)
 
-An **AI-powered product recommendation system** built using **Amazon Personalize**, AWS Lambda, API Gateway, DynamoDB, and CloudFront.  
-This project demonstrates how to build a **serverless, scalable, and low-latency** recommendation engine capable of delivering **personalized product suggestions in real time**.
+# AI-Powered Product Recommendation Engine (AWS)
 
----
+An end-to-end, **production-style** recommendation engine that delivers personalized and related-item recommendations using **AWS** services. It includes **data ingestion**, **ETL**, **modeling** (Amazon Personalize by default), **real-time APIs** (API Gateway + Lambda), **batch inference**, **IaC**, **CI/CD**, and **observability**.
 
-## 🚀 Features
-- **Personalized Recommendations** using Amazon Personalize
-- **Serverless APIs** with AWS Lambda & API Gateway
-- **Low Latency (<150ms p95)** responses
-- **Product Catalog Management** via DynamoDB
-- **Event Tracking** for user clicks, views, and purchases
-- **Weekly Model Retraining** via AWS EventBridge
-- **React Frontend** hosted on S3 + CloudFront
+> Portfolio-ready project you can deploy and demo. Use this repo to showcase cloud, ML, and systems design skills.
 
----
+## Architecture
 
-## 🛠 Tech Stack
-**AWS Services**
-- Amazon Personalize (ML Model Training & Inference)
-- Lambda (Backend Functions)
-- API Gateway (REST API)
-- DynamoDB (Product & Event Storage)
-- S3 (Data Storage & Static Website Hosting)
-- EventBridge (Automated Retraining Schedule)
-- CloudFront (Content Delivery)
-- IAM (Secure Access Management)
-- CloudWatch (Monitoring & Logging)
+```mermaid
+flowchart LR
+  A[Web/App Events] -->|Kinesis| B[Firehose]
+  B --> C[S3 Data Lake]
+  D[Catalog Dump] --> C
+  C --> E[Glue ETL/Curated]
+  E --> F[(Amazon Personalize)]
+  F --> G{Serving}
+  G -->|Real-time| H[API Gateway → Lambda → Campaign/Endpoint]
+  G -->|Batch| I[Batch Recommendations in S3]
+  H --> J[Frontend (S3 + CloudFront)]
 
-**Languages & Tools**
-- Python (Lambda Functions)
-- React (Frontend UI)
-- Terraform (Infrastructure as Code)
-- Draw.io (Architecture Diagrams)
-## 🗺 Architecture Diagram
-![Architecture Diagram](Architecture.png)
+  subgraph Ops
+  K[Step Functions: nightly import/retrain/deploy]
+  L[CloudWatch + Model Monitor + QuickSight]
+  end
+```
 
-## 🛠 Tech Stack
-- **AWS Personalize** – Machine learning for personalized recommendations
-- **AWS Lambda** – Backend serverless functions
-- **API Gateway** – REST API for client-server communication
-- **DynamoDB** – NoSQL database for products and user events
-- **S3 + CloudFront** – Static hosting & CDN for React frontend
-- **React** – Frontend application
-- **EventBridge** – Model retraining scheduler
+### Key AWS components
+- **Kinesis / Firehose → S3** for clickstream ingestion
+- **AWS Glue / PySpark** for ETL & curation (parquet)
+- **Amazon Personalize** for fast-to-prod recommendations (switchable to SageMaker)
+- **API Gateway + Lambda** for real-time APIs
+- **Step Functions** for orchestration (import/retrain/batch)
+- **CloudWatch** for logs/alarms; **QuickSight** dashboards
+- **S3 + CloudFront** for optional SPA frontend hosting
+- **Terraform** for Infrastructure-as-Code
+- **GitHub Actions** for CI/CD
 
 ---
 
-## 🚀 How It Works
-1. User opens the frontend (S3 + CloudFront).
-2. API Gateway sends requests to AWS Lambda.
-3. Lambda retrieves data from DynamoDB and AWS Personalize.
-4. Recommendations are returned to the frontend.
-5. User activity events are stored in DynamoDB for future model retraining.
+## Getting started (local)
+
+### 1) Create & activate a virtual environment
+```bash
+python3 -m venv .venv
+source .venv/bin/activate   # Windows: .venv\\Scripts\\activate
+pip install -r services/api/requirements.txt
+```
+
+### 2) Generate sample data
+```bash
+python data/generators/generate_synthetic.py
+```
+This writes `data/sample_catalog.csv` and small interaction files to `data/`.
+
+### 3) Run unit tests (API layer)
+```bash
+pytest -q
+```
 
 ---
 
-## 📦 Setup Instructions
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/AnuhyaPachika/AI-Powered-Product-Recommendation-Engine-using-AWS.git
+## AWS Deploy (high level)
 
+> You need an AWS account and AWS CLI configured (`aws configure`).
 
+1. **Provision core infra** (VPC optional for this starter):  
+   - Edit `infra/terraform/variables.tf` and `terraform.tfvars` (create one) with your values.  
+   - Initialize & apply:
+     ```bash
+     cd infra/terraform
+     terraform init
+     terraform apply
+     ```
+
+2. **Create a Personalize dataset group** and import data (manual or CLI). See `model/personalize/README.md` (to be added) for detailed commands.
+
+3. **Deploy API** (Lambda + API Gateway):  
+   - Package Lambda:
+     ```bash
+     cd services/api
+     pip install -r requirements.txt -t lambda/
+     cd lambda && zip -r ../lambda.zip . && cd ..
+     ```
+   - Use Terraform modules or AWS SAM/Serverless Framework (future enhancement). As a simple start, upload `lambda.zip` to a Lambda function in the console and connect it to API Gateway.
+
+4. **(Optional) Frontend**: host a SPA on S3 + CloudFront and point it to your API endpoints.
 
 ---
 
-## 📂 Project Structure
-├── README.md                # Documentation
-├── architecture.png         # Architecture diagram
-├── Welcome file.md          # Detailed project intro
-├── LICENSE                  # License info
-├── architecture.drawio.png  # Source diagram file
+## API (OpenAPI excerpt)
 
+- `GET /recommendations/personalized?userId=U123&k=10`
+- `GET /recommendations/related?itemId=I456&k=10`
+- `POST /events` (records user events; mock in this starter)
 
- 
+Full spec: `services/api/openapi.yaml`
 
+---
 
+## Repo structure
+
+```
+ai-reco-engine-aws/
+├─ infra/
+│  └─ terraform/
+│     ├─ main.tf
+│     ├─ variables.tf
+│     └─ outputs.tf
+├─ services/
+│  └─ api/
+│     ├─ lambda/
+│     │  ├─ app.py
+│     │  └─ util.py
+│     ├─ requirements.txt
+│     ├─ openapi.yaml
+│     └─ tests/
+│        └─ test_api.py
+├─ pipelines/
+│  └─ glue_jobs/
+│     └─ README.md
+├─ data/
+│  ├─ sample_catalog.csv
+│  └─ generators/
+│     └─ generate_synthetic.py
+├─ .github/
+│  └─ workflows/
+│     └─ cicd.yml
+├─ .gitignore
+└─ README.md
+```
+
+---
+
+## Resume bullets (paste-ready)
+
+- Built an **AI-powered product recommendation engine** on AWS delivering **low-latency** results via **API Gateway + Lambda + Amazon Personalize**, with automated nightly refresh using **Step Functions**.
+- Designed a **streaming data pipeline** (Kinesis → Firehose → S3 → Glue) and **batch top‑N** generation stored in S3 for downstream consumption.
+- Implemented **IaC** with Terraform and **CI/CD** with GitHub Actions; added **CloudWatch** dashboards and alarms for **SLOs** (latency, error rate).
+
+> Replace numbers with your actual test results (e.g., p95 latency, CTR uplift from an A/B demo).
+
+---
+
+## License
+MIT

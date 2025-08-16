@@ -1,0 +1,46 @@
+
+openapi: 3.0.3
+info:
+  title: AI Reco Engine API
+  version: 0.1.0
+paths:
+  /recommendations/personalized:
+    get:
+      summary: Personalized recommendations
+      parameters:
+        - in: query
+          name: userId
+          schema: { type: string }
+          required: true
+        - in: query
+          name: k
+          schema: { type: integer, default: 10 }
+      responses:
+        "200":
+          description: OK
+  /recommendations/related:
+    get:
+      summary: Related items for a given item
+      parameters:
+        - in: query
+          name: itemId
+          schema: { type: string }
+          required: true
+        - in: query
+          name: k
+          schema: { type: integer, default: 10 }
+      responses:
+        "200":
+          description: OK
+  /events:
+    post:
+      summary: Ingest a user interaction event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "200":
+          description: Accepted
